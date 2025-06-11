@@ -98,14 +98,14 @@ Discuss these security issues:
 - [ ] Create functions to:
   - [x] Sign JWTs with user info and expiration
   - [x] Verify and decode JWTs
-  - [ ] Handle expired tokens
+  - [x] Handle expired tokens
 
 ### Step 9: Create Login Endpoint
 - [x] `POST /api/login` - Takes username/password
   - [x] Verify credentials against user list
   - [x] Sign JWT with user ID and role
   - [x] Set JWT in cookie AND return it in response
-  - [ ] Document in Swagger with examples
+  - [x] Document in Swagger with examples
 
 ### Step 10: Update Authentication Middleware
 - [ ] Modify middleware to:

@@ -25,27 +25,6 @@ const cookiePlugin = new Elysia()
     httpOnly: true,
   }))
 
-const profile = new Elysia()
-  .use(cookiePlugin)
-  .use(jwtPlugin)
-  .get('/api/profile', async ({ jwt, cookie }) => {
-    console.log(`Visiting /profile`)
-    const authToken = cookie.authToken!.value
-    if (!authToken) {
-      console.log(`No authToken found in cookie`)
-      return status(401)
-    } else {
-      try {
-        const payload = await jwt.verify(authToken)
-        console.log(`Cookie verified!`)
-      } catch {
-        console.log(`JWT token verification error`)
-        cookie.authToken?.remove()
-        return status(401)
-      }
-    }
-  })
-
 const login = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
@@ -67,7 +46,7 @@ const login = new Elysia()
     const tokenPayload = {
       id: user.id,
       role: user.role,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60)
+      exp: Math.floor(Date.now() / 1000) + (30)
     }
     // sign JWT token
     const token = await jwt.sign(tokenPayload)
@@ -83,6 +62,45 @@ const login = new Elysia()
     return token
   })
 
+const profile = new Elysia()
+  .use(cookiePlugin)
+  .use(jwtPlugin)
+  .get('/api/profile', async ({ jwt, cookie }) => {
+    console.log(`Visiting /profile`)
+    const authToken = cookie.authToken!.value
+    if (!authToken) {
+      console.log(`No authToken found in cookie`)
+      return status(401)
+    } else {
+      try {
+        const payload = await jwt.verify(authToken)
+
+        // throw error on bad payload
+        if (!payload) {
+          console.log(`JWT token not valid`)
+          cookie.authToken?.remove()
+          return status(401)
+        }
+
+        // throw error if token expired or no expiry set
+        if (payload.exp === undefined || payload.exp < Math.floor(Date.now() / 1000)) {
+          console.log(`Token expired or invalid`)
+          cookie.authToken?.remove()
+          return status(401)
+        }
+
+        const user_profile = users.find(usr => usr.id === payload.id)
+
+        console.log(`Here is your profile: ${JSON.stringify(user_profile)}`)
+
+      } catch {
+        console.log(`JWT token verification error`)
+        cookie.authToken?.remove()
+        return status(401)
+      }
+    }
+  })
+
 const app = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
@@ -95,5 +113,4 @@ const app = new Elysia()
   })
   .use(login)
   .use(profile)
-
   .listen(PORT, () => console.log(`server listening at http://localhost:${PORT}`))

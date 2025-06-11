@@ -63,39 +63,40 @@ const login = new Elysia()
     return token
   })
 
-// obtains a user's information from an auth header or cookie
-const retrieveUser = new Elysia()
+const authUser = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
   .derive(({ as: 'global' }), async ({ jwt, cookie, headers }) => {
-    const authToken = cookie.authToken!.value
-    if (!authToken) {
-      console.log(`No authToken found in cookie`)
-      return status(401)
+    // Grab cookie token if available, header token if not
+    const token = cookie.authToken?.value ?? headers.auth
+
+    // throw error if not token available at all
+    if (!token) {
+      console.log(`Could not verify a user from the cookie`)
+      return status(401);
     }
 
     try {
-      const payload = await jwt.verify(authToken)
+      const payload = await jwt.verify(token)
 
       // throw error on bad payload
       if (!payload) {
-        console.log(`JWT token not valid`)
+        console.log(`JWT token not valid. Please try again`)
         cookie.authToken?.remove()
-        return status(401)
+        return status(401);
       }
 
       // throw error if token expired or no expiry set
       if (payload.exp === undefined || payload.exp < Math.floor(Date.now() / 1000)) {
         console.log(`Token expired or invalid`)
         cookie.authToken?.remove()
-        return status(401)
       }
 
       // find the user
       const user = users.find(usr => usr.id === payload.id)
       if (!user) {
         console.log(`User does not exist`)
-        return status(401)
+        return status(401);
       }
 
       console.log(`Here is your profile: ${JSON.stringify(user)}`)
@@ -106,22 +107,28 @@ const retrieveUser = new Elysia()
     } catch {
       console.log(`JWT token verification error`)
       cookie.authToken?.remove()
-      return status(401)
+      return status(401);
     }
   })
 
 const profile = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
-  .use(retrieveUser)
+  .use(authUser)
   .get('/api/profile', async ({ user }) => {
     console.log(`Visiting /profile`)
     return `Here is your profile: ${JSON.stringify(user)}`
   })
 
 const protectedRoutes = new Elysia()
-  .use(retrieveUser)
+  .use(authUser)
   .onBeforeHandle(({ user }) => {
+    if (!user) {
+      return {
+        message: "Error: Not logged in",
+        status: 400
+      }
+    }
     if (user.role !== 'admin') {
       return {
         message: "Permission Denied: This path is admin-only",
@@ -141,7 +148,6 @@ const app = new Elysia()
   .use(jwtPlugin)
   .use(swagger({ path: '/api-docs' }))
   .get('/api/public', () => {
-    console.log('PLEASE OH MY GOD')
     return {
       message: "This is public information",
     }

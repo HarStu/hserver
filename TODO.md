@@ -110,10 +110,10 @@ Discuss these security issues:
 ### Step 10: Update Authentication Middleware
 - [ ] Modify middleware to:
   - [ ] Extract JWT from Authorization header OR cookie
-  - [ ] Verify JWT signature
-  - [ ] Decode user info from JWT
-  - [ ] Check if user role is "admin"
-  - [ ] Handle expired tokens gracefully
+  - [x] Verify JWT signature
+  - [x] Decode user info from JWT
+  - [x] Check if user role is "admin"
+  - [x] Handle expired tokens gracefully
 
 ### Step 11: Add More Protected Endpoints
 - [ ] `POST /api/chat` - AI chat (requires any authenticated user)

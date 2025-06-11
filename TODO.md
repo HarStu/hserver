@@ -88,23 +88,23 @@ Discuss these security issues:
 **Solution**: We need something that can expire and be renewed automatically → **JWT Tokens**
 
 ### Step 7: Learn About JWTs
-- [ ] Read about JWT structure (header.payload.signature)
-- [ ] Understand signing vs verification
-- [ ] Learn about expiry (`exp` claim)
-- [ ] Practice signing and decoding JWTs manually
+- [x] Read about JWT structure (header.payload.signature)
+- [x] Understand signing vs verification
+- [x] Learn about expiry (`exp` claim)
+- [x] Practice signing and decoding JWTs manually
 
 ### Step 8: Implement JWT System
-- [ ] Install JWT library (`jsonwebtoken` or `jose`)
+- [x] Install JWT library (`jsonwebtoken` or `jose`)
 - [ ] Create functions to:
-  - [ ] Sign JWTs with user info and expiration
-  - [ ] Verify and decode JWTs
+  - [x] Sign JWTs with user info and expiration
+  - [x] Verify and decode JWTs
   - [ ] Handle expired tokens
 
 ### Step 9: Create Login Endpoint
-- [ ] `POST /api/login` - Takes username/password
-  - [ ] Verify credentials against user list
-  - [ ] Sign JWT with user ID and role
-  - [ ] Set JWT in cookie AND return it in response
+- [x] `POST /api/login` - Takes username/password
+  - [x] Verify credentials against user list
+  - [x] Sign JWT with user ID and role
+  - [x] Set JWT in cookie AND return it in response
   - [ ] Document in Swagger with examples
 
 ### Step 10: Update Authentication Middleware

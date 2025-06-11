@@ -45,10 +45,10 @@ This assignment builds a **single application** that you'll develop incrementall
 - [x] **Problem**: Both endpoints are actually public! Anyone can access the "protected" one.
 
 ### Step 2: Add API Documentation
-- [ ] Add Swagger/OpenAPI documentation for both endpoints
-- [ ] Serve interactive docs at `/api-docs`
-- [ ] Document request/response schemas
-- [ ] Test both endpoints through Swagger UI
+- [x] Add Swagger/OpenAPI documentation for both endpoints
+- [x] Serve interactive docs at `/api-docs`
+- [x] Document request/response schemas
+- [x] Test both endpoints through Swagger UI
 
 ### Step 3: Create User System
 - [ ] Create an in-memory list of users with different roles:

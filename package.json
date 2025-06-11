@@ -1,6 +1,9 @@
 {
   "name": "hserver",
   "private": true,
+  "scripts": {
+    "dev": "bun --watch server.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

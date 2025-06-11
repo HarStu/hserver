@@ -3,21 +3,28 @@ import { swagger } from '@elysiajs/swagger'
 const PORT = 3001
 
 const users = [
-  { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
-  { id: 2, username: 'user', password: 'user123', role: 'basic' }
+  { id: 1, username: 'admin', password: 'admin123', role: 'admin', secret: "admin-secret-123" },
+  { id: 2, username: 'user', password: 'user123', role: 'basic', secret: "user-secret-456" }
 ]
 
 const adminRoutes = new Elysia()
   .onBeforeHandle({ as: 'local' }, (request) => { // pass a function that is going to run before any requests which follow in the chain
-    const { username, password } = request.headers
-    if (username === undefined || password === undefined) {
+    const { authorization } = request.headers
+    console.log(`req with the following headers: ${JSON.stringify(request.headers)}`)
+    if (authorization === undefined) {
+      console.log(`You don't even have the right header, doofus`)
       return status(401)
     }
 
-    const checkAdmin = (username: string, password: string): boolean => {
-      return users.filter((usr) => usr.username === username && usr.password === password && usr.role === 'admin').length === 1
+    const checkAdmin = (secret: string): boolean => {
+      const reqUser = users.find((usr) => secret.includes(usr.secret))
+      if (reqUser && reqUser.role === 'admin') {
+        return true
+      } else {
+        return false
+      }
     }
-    if (checkAdmin(username, password)) {
+    if (!checkAdmin(authorization)) {
       return status(401)
     }
   })

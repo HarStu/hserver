@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "hserver api",
+    "description": "tutorial project for the fractal bootcamp",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001/api",
+      "description": "this project is currently not deployed"
+    }
+  ],
+  "paths": {
+    "/public": {
+      "get": {
+        "summary": "Returns a message",
+        "description": "Basic endpoint returning a simple message for proof-of-concept purposes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "exmaple": {
+                    "message": "This is public information"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/protected": {
+      "get": {
+        "summary": "Returns a message",
+        "description": "Basic protected endpoint returning a simple message for proof-of-concept purposes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "message": "Only admin should be able to see this"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

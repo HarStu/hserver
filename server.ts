@@ -25,6 +25,7 @@ const cookiePlugin = new Elysia()
     httpOnly: true,
   }))
 
+// logs in and stores a JWT cookie for the user's login
 const login = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
@@ -46,7 +47,7 @@ const login = new Elysia()
     const tokenPayload = {
       id: user.id,
       role: user.role,
-      exp: Math.floor(Date.now() / 1000) + (30)
+      exp: Math.floor(Date.now() / 1000) + (60 * 60)
     }
     // sign JWT token
     const token = await jwt.sign(tokenPayload)
@@ -62,42 +63,76 @@ const login = new Elysia()
     return token
   })
 
-const profile = new Elysia()
+// obtains a user's information from an auth header or cookie
+const retrieveUser = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
-  .get('/api/profile', async ({ jwt, cookie }) => {
-    console.log(`Visiting /profile`)
+  .derive(({ as: 'global' }), async ({ jwt, cookie, headers }) => {
     const authToken = cookie.authToken!.value
     if (!authToken) {
       console.log(`No authToken found in cookie`)
       return status(401)
-    } else {
-      try {
-        const payload = await jwt.verify(authToken)
+    }
 
-        // throw error on bad payload
-        if (!payload) {
-          console.log(`JWT token not valid`)
-          cookie.authToken?.remove()
-          return status(401)
-        }
+    try {
+      const payload = await jwt.verify(authToken)
 
-        // throw error if token expired or no expiry set
-        if (payload.exp === undefined || payload.exp < Math.floor(Date.now() / 1000)) {
-          console.log(`Token expired or invalid`)
-          cookie.authToken?.remove()
-          return status(401)
-        }
-
-        const user_profile = users.find(usr => usr.id === payload.id)
-
-        console.log(`Here is your profile: ${JSON.stringify(user_profile)}`)
-
-      } catch {
-        console.log(`JWT token verification error`)
+      // throw error on bad payload
+      if (!payload) {
+        console.log(`JWT token not valid`)
         cookie.authToken?.remove()
         return status(401)
       }
+
+      // throw error if token expired or no expiry set
+      if (payload.exp === undefined || payload.exp < Math.floor(Date.now() / 1000)) {
+        console.log(`Token expired or invalid`)
+        cookie.authToken?.remove()
+        return status(401)
+      }
+
+      // find the user
+      const user = users.find(usr => usr.id === payload.id)
+      if (!user) {
+        console.log(`User does not exist`)
+        return status(401)
+      }
+
+      console.log(`Here is your profile: ${JSON.stringify(user)}`)
+
+      // return the user
+      return { user }
+
+    } catch {
+      console.log(`JWT token verification error`)
+      cookie.authToken?.remove()
+      return status(401)
+    }
+  })
+
+const profile = new Elysia()
+  .use(cookiePlugin)
+  .use(jwtPlugin)
+  .use(retrieveUser)
+  .get('/api/profile', async ({ user }) => {
+    console.log(`Visiting /profile`)
+    return `Here is your profile: ${JSON.stringify(user)}`
+  })
+
+const protectedRoutes = new Elysia()
+  .use(retrieveUser)
+  .onBeforeHandle(({ user }) => {
+    if (user.role !== 'admin') {
+      return {
+        message: "Permission Denied: This path is admin-only",
+        status: 400
+      }
+    }
+  })
+  .get('/api/private', () => {
+    return {
+      message: "Top secret, admins only!!!",
+      status: 200
     }
   })
 
@@ -113,4 +148,5 @@ const app = new Elysia()
   })
   .use(login)
   .use(profile)
+  .use(protectedRoutes)
   .listen(PORT, () => console.log(`server listening at http://localhost:${PORT}`))

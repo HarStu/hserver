@@ -108,8 +108,8 @@ Discuss these security issues:
   - [x] Document in Swagger with examples
 
 ### Step 10: Update Authentication Middleware
-- [ ] Modify middleware to:
-  - [ ] Extract JWT from Authorization header OR cookie
+- [x] Modify middleware to:
+  - [x] Extract JWT from Authorization header OR cookie
   - [x] Verify JWT signature
   - [x] Decode user info from JWT
   - [x] Check if user role is "admin"
@@ -122,11 +122,11 @@ Discuss these security issues:
 - [ ] Update Swagger with authentication schemes
 
 ### Step 12: Test the Full Flow
-- [ ] Use Swagger UI to:
-  - [ ] Try accessing protected endpoints (should fail)
-  - [ ] Login via `/api/login` endpoint
-  - [ ] Use returned JWT in "Authorize" button
-  - [ ] Access protected endpoints (should work)
+- [x] Use Swagger UI to:
+  - [x] Try accessing protected endpoints (should fail)
+  - [x] Login via `/api/login` endpoint
+  - [x] Use returned JWT in "Authorize" button
+  - [x] Access protected endpoints (should work)
 
 ### Step 13: Professional Implementation with Better Auth
 - [ ] Replace your custom system with [Better Auth](https://www.better-auth.com/)

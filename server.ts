@@ -32,11 +32,11 @@ const login = new Elysia()
   .derive({ as: 'local' }, (request) => {
     const { username, password } = request.headers
     if (username === undefined || password === undefined) {
-      return status(401, `Username or password missing`)
+      return status(400, `Username or password missing`)
     } else {
       const user = users.find((usr) => usr.username === username && usr.password === password)
       if (!user) {
-        return status(401, `User not found`)
+        return status(400, `User not found`)
       } else {
         return { user: user }
       }
@@ -73,7 +73,7 @@ const authUser = new Elysia()
     // throw error if not token available at all
     if (!token) {
       console.log(`User is not logged in`)
-      return status(401, `User is not logged in`);
+      return status(400, `User is not logged in`);
     }
 
     try {
@@ -83,21 +83,21 @@ const authUser = new Elysia()
       if (!payload) {
         console.log(`User token invalid. Please try again.`)
         cookie.authToken?.remove()
-        return status(401, `User token invalid. Please try again.`);
+        return status(400, `User token invalid. Please try again.`);
       }
 
       // throw error if token expired or no expiry set
       if (payload.exp === undefined || payload.exp < Math.floor(Date.now() / 1000)) {
         console.log(`Invalid payload in user token`)
         cookie.authToken?.remove()
-        return status(401, `Invalid payload in user token`)
+        return status(400, `Invalid payload in user token`)
       }
 
       // find the user
       const user = users.find(usr => usr.id === payload.id)
       if (!user) {
         console.log(`User does not exist`)
-        return status(401, `User does not exist`);
+        return status(400, `User does not exist`);
       }
 
       console.log(`Here is your profile: ${JSON.stringify(user)} `)
@@ -108,7 +108,7 @@ const authUser = new Elysia()
     } catch {
       console.log(`JWT token verification error`)
       cookie.authToken?.remove()
-      return status(401, `Error while validating user identity`);
+      return status(400, `Error while validating user identity`);
     }
   })
 

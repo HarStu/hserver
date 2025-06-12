@@ -32,11 +32,11 @@ const login = new Elysia()
   .derive({ as: 'local' }, (request) => {
     const { username, password } = request.headers
     if (username === undefined || password === undefined) {
-      return status(401)
+      return status(400, `Username or password missing`)
     } else {
       const user = users.find((usr) => usr.username === username && usr.password === password)
       if (!user) {
-        return status(401)
+        return status(400, `User not found`)
       } else {
         return { user: user }
       }
@@ -72,8 +72,8 @@ const authUser = new Elysia()
 
     // throw error if not token available at all
     if (!token) {
-      console.log(`Could not verify a user from the cookie`)
-      return status(401);
+      console.log(`User is not logged in`)
+      return status(400, `User is not logged in`);
     }
 
     try {
@@ -81,25 +81,26 @@ const authUser = new Elysia()
 
       // throw error on bad payload
       if (!payload) {
-        console.log(`JWT token not valid. Please try again`)
+        console.log(`User token invalid. Please try again.`)
         cookie.authToken?.remove()
-        return status(401);
+        return status(400, `User token invalid. Please try again.`);
       }
 
       // throw error if token expired or no expiry set
       if (payload.exp === undefined || payload.exp < Math.floor(Date.now() / 1000)) {
-        console.log(`Token expired or invalid`)
+        console.log(`Invalid payload in user token`)
         cookie.authToken?.remove()
+        return status(400, `Invalid payload in user token`)
       }
 
       // find the user
       const user = users.find(usr => usr.id === payload.id)
       if (!user) {
         console.log(`User does not exist`)
-        return status(401);
+        return status(400, `User does not exist`);
       }
 
-      console.log(`Here is your profile: ${JSON.stringify(user)}`)
+      console.log(`Here is your profile: ${JSON.stringify(user)} `)
 
       // return the user
       return { user }
@@ -107,7 +108,7 @@ const authUser = new Elysia()
     } catch {
       console.log(`JWT token verification error`)
       cookie.authToken?.remove()
-      return status(401);
+      return status(400, `Error while validating user identity`);
     }
   })
 
@@ -116,43 +117,64 @@ const profile = new Elysia()
   .use(jwtPlugin)
   .use(authUser)
   .get('/api/profile', async ({ user }) => {
-    console.log(`Visiting /profile`)
-    return `Here is your profile: ${JSON.stringify(user)}`
+    console.log(`Visiting / profile`)
+    return `Here is your profile: ${JSON.stringify(user)} `
   })
 
 const protectedRoutes = new Elysia()
   .use(authUser)
   .onBeforeHandle(({ user }) => {
     if (!user) {
-      return {
+      return status(400, {
         message: "Error: Not logged in",
-        status: 400
-      }
+      })
     }
     if (user.role !== 'admin') {
-      return {
+      return status(400, {
         message: "Permission Denied: This path is admin-only",
-        status: 400
-      }
+      })
     }
   })
   .get('/api/private', () => {
-    return {
+    return status(200, {
       message: "Top secret, admins only!!!",
-      status: 200
+    })
+  })
+
+const chatRoutes = new Elysia()
+  .use(authUser)
+  .onBeforeHandle(({ user }) => {
+    if (!user) {
+      return status(400, `Login error. Please try to log in again`)
     }
   })
+  .post('/api/chat', ({ user }) => {
+    return status(200, {
+      message: `placeholder for chat POST`
+    })
+  })
+  .get('/api/chat/history', ({ user }) => {
+    return status(200, {
+      message: `placeholder for chat history`
+    })
+  })
+  .delete('/api/chat/history', ({ user }) => {
+    return status(200, {
+      message: `placeholder for clearing chat history`
+    })
+  })
+
 
 const app = new Elysia()
   .use(cookiePlugin)
   .use(jwtPlugin)
   .use(swagger({ path: '/api-docs' }))
   .get('/api/public', () => {
-    return {
+    return status(200, {
       message: "This is public information",
-    }
+    })
   })
   .use(login)
   .use(profile)
-  .use(protectedRoutes)
+  .use(chatRoutes)
   .listen(PORT, () => console.log(`server listening at http://localhost:${PORT}`))

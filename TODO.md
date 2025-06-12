@@ -116,10 +116,10 @@ Discuss these security issues:
   - [x] Handle expired tokens gracefully
 
 ### Step 11: Add More Protected Endpoints
-- [ ] `POST /api/chat` - AI chat (requires any authenticated user)
-- [ ] `GET /api/chat/history` - Chat history (requires authentication)
-- [ ] `DELETE /api/chat/history` - Clear history (requires authentication)
-- [ ] Update Swagger with authentication schemes
+- [x] `POST /api/chat` - AI chat (requires any authenticated user)
+- [x] `GET /api/chat/history` - Chat history (requires authentication)
+- [x] `DELETE /api/chat/history` - Clear history (requires authentication)
+- [x] Update Swagger with authentication schemes
 
 ### Step 12: Test the Full Flow
 - [x] Use Swagger UI to:
